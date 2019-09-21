@@ -3,12 +3,12 @@
  */
 package hu.billingo.dto;
 
-import hu.billingo.dto.base.ResponseDataList;
+import hu.billingo.dto.base.ResponseAttributesList;
 
 /**
- * DTO alias class of list of bank accounts.
+ * DTO alias class of list of VAT.
  *
  * @author <a href="mailto:gabor.auth@iotguru.cloud">Gábor AUTH</a>
  */
-public class BankAccountsResponse extends ResponseDataList<BankAccount> {
+public class VatListResponse extends ResponseAttributesList<Vat> {
 }

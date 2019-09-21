@@ -3,26 +3,16 @@
  */
 package hu.billingo;
 
+import static hu.billingo.BillingoClientHelper.restHelper;
 import hu.billingo.dto.BankAccount;
+import hu.billingo.dto.BankAccountListResponse;
 import hu.billingo.dto.BankAccountResponse;
-import hu.billingo.dto.BankAccountsResponse;
-import hu.billingo.dto.base.Response;
-import hu.billingo.utils.JsonUtils;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import java.io.BufferedReader;
+import hu.billingo.dto.VatEuResponse;
+import hu.billingo.dto.VatListResponse;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Billingo client.
@@ -30,11 +20,6 @@ import org.slf4j.LoggerFactory;
  * @author <a href="mailto:gabor.auth@iotguru.cloud">Gábor AUTH</a>
  */
 public final class BillingoClient {
-
-    /**
-     * The logger instance.
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(BillingoClient.class);
 
     /**
      * The public key.
@@ -75,8 +60,8 @@ public final class BillingoClient {
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
-    public BankAccountsResponse getBankAccount(final Long id) throws IOException, NoSuchAlgorithmException {
-        return restHelper(BankAccountsResponse.class, "GET", "bank_accounts", null, id);
+    public BankAccountListResponse getBankAccount(final Long id) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, BankAccountListResponse.class, "GET", "bank_accounts", null, null, id);
     }
 
     /**
@@ -87,8 +72,8 @@ public final class BillingoClient {
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
-    public BankAccountsResponse getBankAccounts() throws IOException, NoSuchAlgorithmException {
-        return restHelper(BankAccountsResponse.class, "GET", "bank_accounts", null);
+    public BankAccountListResponse getBankAccounts() throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, BankAccountListResponse.class, "GET", "bank_accounts", null, null);
     }
 
     /**
@@ -102,7 +87,7 @@ public final class BillingoClient {
      * @throws NoSuchAlgorithmException
      */
     public BankAccountResponse createBankAccount(final BankAccount account) throws IOException, NoSuchAlgorithmException {
-        return restHelper(BankAccountResponse.class, "POST", "bank_accounts", account.toJson());
+        return restHelper(publicKey, privateKey, BankAccountResponse.class, "POST", "bank_accounts", null, account.toJson());
     }
 
     /**
@@ -117,104 +102,96 @@ public final class BillingoClient {
      * @throws NoSuchAlgorithmException
      */
     public BankAccountResponse updateBankAccount(final BankAccount account, final Long id) throws IOException, NoSuchAlgorithmException {
-        return restHelper(BankAccountResponse.class, "PUT", "bank_accounts", account.toJson(), id);
+        return restHelper(publicKey, privateKey, BankAccountResponse.class, "PUT", "bank_accounts", null, account.toJson(), id);
     }
 
     /**
-     * Generate fresh JWT token.
+     * Return the EU VAT.
      *
-     * @return the JWT token
+     * @param country the county code given by the user
+     * @param ip the IP address of the user
+     * @param businessCountry the country code for the operating business
+     * @param vatCode the EU VAT code
      *
-     * @throws NoSuchAlgorithmException no such algorithm
-     */
-    private String generateJwtToken() throws NoSuchAlgorithmException {
-        final String secret = new String(Base64.getEncoder().encode(privateKey.getBytes(Charset.defaultCharset())));
-        final Long time = System.currentTimeMillis() / 1000;
-
-        final Map<String, Object> map = new HashMap<>();
-        map.put("sub", publicKey);
-        map.put("iat", "" + time);
-        map.put("exp", "" + (time + 30L));
-
-        final String token = Jwts.builder()
-                .setHeaderParam("typ", "JWT")
-                .setClaims(map)
-                .signWith(SignatureAlgorithm.HS256, secret)
-                .compact();
-
-        return token;
-    }
-
-    /**
-     * REST helper method, call the specified URI with the specified method,
-     * send body of 'payload' is not null and process the response.
+     * @return the EU VAT
      *
-     * @param <T> the run-time type of the response
-     * @param type the run-time type of the response
-     * @param method the HTTP method
-     * @param uri the REST URI
-     * @param payload the optional payload
-     * @param params the optional list of parameters
-     * @return the response
      * @throws IOException
      * @throws NoSuchAlgorithmException
      */
-    private <T extends Response> T restHelper(final Class<T> type, final String method, final String uri, final String payload, final Object... params) throws IOException, NoSuchAlgorithmException {
-        final StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append("https://www.billingo.hu/api/");
-        urlBuilder.append(uri);
-
-        for (final Object param : params) {
-            urlBuilder.append("/").append(param);
+    public VatEuResponse getVatEu(final String country, final String ip, final String businessCountry, final String vatCode) throws IOException, NoSuchAlgorithmException {
+        final Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("country", country);
+        queryParams.put("ip", ip);
+        queryParams.put("business_country", businessCountry);
+        if (vatCode != null) {
+            queryParams.put("vat_code", vatCode);
         }
 
-        final String jwtToken = generateJwtToken();
+        return restHelper(publicKey, privateKey, VatEuResponse.class, "GET", "vat/eu", queryParams, null);
+    }
 
-        LOGGER.info("{} -              Url: {}", method, urlBuilder.toString());
-        LOGGER.info("{} -        JWT token: {}", method, jwtToken);
+    /**
+     * Return the list of VATs.
+     *
+     * @return the list of VATs
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public VatListResponse getVats() throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, VatListResponse.class, "GET", "vat", null, null);
+    }
 
-        final URL url = new URL(urlBuilder.toString());
-        final HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod(method);
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setRequestProperty("Authorization", "Bearer " + jwtToken);
-        con.setConnectTimeout(5000);
-        con.setReadTimeout(5000);
+    /**
+     * Return the list of VATs with value filter.
+     *
+     * @param valueFilter the value filter
+     *
+     * @return the list of VATs
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public VatListResponse getVats(final Double valueFilter) throws IOException, NoSuchAlgorithmException {
+        final Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("v", "" + valueFilter);
 
-        if (payload != null) {
-            con.setDoOutput(true);
-            try (final OutputStream os = con.getOutputStream()) {
-                byte[] input = payload.getBytes(Charset.defaultCharset());
-                os.write(input, 0, input.length);
-                LOGGER.info("{} -   Output content: {}", method, payload);
-            }
-        }
+        return restHelper(publicKey, privateKey, VatListResponse.class, "GET", "vat", queryParams, null);
+    }
 
-        final int status = con.getResponseCode();
-        LOGGER.info("{} -  Response status: {}", method, status);
-        final StringBuilder content = new StringBuilder();
-        if (status == 200) {
-            try (final BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
-                String inputLine;
-                while ((inputLine = in.readLine()) != null) {
-                    content.append(inputLine);
-                }
-            }
-        } else {
-            try (final BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()))) {
-                String inputLine;
-                while ((inputLine = in.readLine()) != null) {
-                    content.append(inputLine);
-                }
-            }
-        }
+    /**
+     * Return the list of VATs with description filter.
+     *
+     * @param descriptionFilter the description filter
+     *
+     * @return the list of VATs
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public VatListResponse getVats(final String descriptionFilter) throws IOException, NoSuchAlgorithmException {
+        final Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("d", descriptionFilter);
 
-        con.disconnect();
+        return restHelper(publicKey, privateKey, VatListResponse.class, "GET", "vat", queryParams, null);
+    }
 
-        LOGGER.info("{} - Original content: {}", method, content.toString());
-        final T response = JsonUtils.fromJson(type, content.toString());
-        LOGGER.info("{} -   Object content: {}", method, response.toJson());
+    /**
+     * Return the list of VATs with value and description filter.
+     *
+     * @param valueFilter the value filter
+     * @param descriptionFilter the description filter
+     *
+     * @return the list of VATs
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public VatListResponse getVats(final Double valueFilter, final String descriptionFilter) throws IOException, NoSuchAlgorithmException {
+        final Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("v", "" + valueFilter);
+        queryParams.put("d", descriptionFilter);
 
-        return response;
+        return restHelper(publicKey, privateKey, VatListResponse.class, "GET", "vat", queryParams, null);
     }
 }

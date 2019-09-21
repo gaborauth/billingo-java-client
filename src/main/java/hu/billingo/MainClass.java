@@ -3,7 +3,6 @@
  */
 package hu.billingo;
 
-import hu.billingo.dto.BankAccountsResponse;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
@@ -36,13 +35,16 @@ public class MainClass {
                 .privateKey(privateKey)
                 .build();
 
-        final BankAccountsResponse bankAccounts = client.getBankAccounts();
+        client.getBankAccounts();
 
-        if (bankAccounts.getData() == null || bankAccounts.getData().isEmpty()) {
-            return;
-        }
+        System.out.println("====");
 
-        final Long bankId = bankAccounts.getData().get(0).getId();
-        client.getBankAccount(bankId);
+        client.getVats();
+
+        System.out.println("====");
+
+        client.getVatEu("DE", "104.20.46.161", "DE", null);
+
+        System.out.println("====");
     }
 }

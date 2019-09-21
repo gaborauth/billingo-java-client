@@ -7,18 +7,18 @@ import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
 /**
- * Base class of list responses.
+ * Base class of attributes list response.
  *
  * @param <T> the run-time type of the response
  *
  * @author <a href="mailto:gabor.auth@iotguru.cloud">Gábor AUTH</a>
  */
-public abstract class ResponseDataList<T> extends Response {
+public abstract class ResponseAttributesList<T> extends Response {
 
     @SerializedName("type")
     private String type;
     @SerializedName("data")
-    private List<T> data;
+    private List<Attributes<T>> data;
 
     public String getType() {
         return type;
@@ -28,11 +28,11 @@ public abstract class ResponseDataList<T> extends Response {
         this.type = type;
     }
 
-    public List<T> getData() {
+    public List<Attributes<T>> getData() {
         return data;
     }
 
-    public void setData(List<T> data) {
+    public void setData(List<Attributes<T>> data) {
         this.data = data;
     }
 }

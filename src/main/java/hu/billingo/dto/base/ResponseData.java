@@ -17,7 +17,7 @@ public abstract class ResponseData<T> extends Response {
     @SerializedName("type")
     private String type;
     @SerializedName("data")
-    private Attributes<T> data;
+    private T data;
 
     public String getType() {
         return type;
@@ -27,11 +27,11 @@ public abstract class ResponseData<T> extends Response {
         this.type = type;
     }
 
-    public Attributes<T> getData() {
+    public T getData() {
         return data;
     }
 
-    public void setData(Attributes<T> data) {
+    public void setData(T data) {
         this.data = data;
     }
 }

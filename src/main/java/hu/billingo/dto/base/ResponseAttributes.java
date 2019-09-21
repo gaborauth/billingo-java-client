@@ -4,21 +4,20 @@
 package hu.billingo.dto.base;
 
 import com.google.gson.annotations.SerializedName;
-import java.util.List;
 
 /**
- * Base class of list responses.
+ * Base class of single attribute responses.
  *
  * @param <T> the run-time type of the response
  *
  * @author <a href="mailto:gabor.auth@iotguru.cloud">Gábor AUTH</a>
  */
-public abstract class ResponseDataList<T> extends Response {
+public abstract class ResponseAttributes<T> extends Response {
 
     @SerializedName("type")
     private String type;
     @SerializedName("data")
-    private List<T> data;
+    private Attributes<T> data;
 
     public String getType() {
         return type;
@@ -28,11 +27,11 @@ public abstract class ResponseDataList<T> extends Response {
         this.type = type;
     }
 
-    public List<T> getData() {
+    public Attributes<T> getData() {
         return data;
     }
 
-    public void setData(List<T> data) {
+    public void setData(Attributes<T> data) {
         this.data = data;
     }
 }
