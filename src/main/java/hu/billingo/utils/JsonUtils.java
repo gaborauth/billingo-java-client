@@ -3,10 +3,13 @@
  */
 package hu.billingo.utils;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
+import com.google.gson.JsonSyntaxException;
+import hu.billingo.dto.ClientDefaults;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Date;
@@ -28,6 +31,17 @@ public final class JsonUtils {
      * Custom Date serializer.
      */
     private static final JsonSerializer<Date> DATE_SERIALIZER = (s, t, c) -> new JsonPrimitive(s.getTime());
+
+    /**
+     * Custom client defaults deserializer.
+     */
+    private static final JsonDeserializer<ClientDefaults> CLIENT_DEFAULTS_DESERIALIZER = (j, t, c) -> {
+        try {
+            return new Gson().fromJson(j, t);
+        } catch (JsonSyntaxException e) {
+            return null;
+        }
+    };
 
     /**
      * Create T instance from JSON string.
@@ -66,6 +80,7 @@ public final class JsonUtils {
         final GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(Date.class, DATE_DESERIALIZER);
         builder.registerTypeAdapter(Date.class, DATE_SERIALIZER);
+        builder.registerTypeAdapter(ClientDefaults.class, CLIENT_DEFAULTS_DESERIALIZER);
         return builder.create().fromJson(json, type);
     }
 
@@ -89,6 +104,7 @@ public final class JsonUtils {
         final GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(Date.class, DATE_DESERIALIZER);
         builder.registerTypeAdapter(Date.class, DATE_SERIALIZER);
+        builder.registerTypeAdapter(ClientDefaults.class, CLIENT_DEFAULTS_DESERIALIZER);
         return builder.create().toJson(object);
     }
 }

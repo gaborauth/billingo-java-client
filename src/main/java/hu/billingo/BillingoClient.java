@@ -7,6 +7,9 @@ import static hu.billingo.BillingoClientHelper.restHelper;
 import hu.billingo.dto.BankAccount;
 import hu.billingo.dto.BankAccountListResponse;
 import hu.billingo.dto.BankAccountResponse;
+import hu.billingo.dto.Client;
+import hu.billingo.dto.ClientListResponse;
+import hu.billingo.dto.ClientResponse;
 import hu.billingo.dto.CurrencyResponse;
 import hu.billingo.dto.PaymentMethodListResponse;
 import hu.billingo.dto.VatEuResponse;
@@ -18,6 +21,8 @@ import java.util.Map;
 
 /**
  * Billingo client.
+ *
+ * @TODO: Missing: Invoices, Recurring, Invoice query, Expenses, Products
  *
  * @author <a href="mailto:gabor.auth@iotguru.cloud">Gábor AUTH</a>
  */
@@ -105,6 +110,86 @@ public final class BillingoClient {
      */
     public BankAccountResponse updateBankAccount(final BankAccount account, final Long id) throws IOException, NoSuchAlgorithmException {
         return restHelper(publicKey, privateKey, BankAccountResponse.class, "PUT", "bank_accounts", null, account.toJson(), id);
+    }
+
+    /**
+     * Return the list of clients.
+     *
+     * @param page the page
+     * @param maxPerPage maximum number of results
+     *
+     * @return the list of clients
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public ClientListResponse getClients(final Integer page, final Integer maxPerPage) throws IOException, NoSuchAlgorithmException {
+        final Map<String, String> queryParams = new HashMap<>();
+        if (page != null) {
+            queryParams.put("page", "" + page);
+        }
+        if (maxPerPage != null) {
+            queryParams.put("max_per_page", "" + maxPerPage);
+        }
+
+        return restHelper(publicKey, privateKey, ClientListResponse.class, "GET", "clients", queryParams, null);
+    }
+
+    /**
+     * Return the clients.
+     *
+     * @param id the id of the client
+     *
+     * @return the list of client
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public ClientListResponse getClient(final Long id) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, ClientListResponse.class, "GET", "clients", null, null, id);
+    }
+
+    /**
+     * Create a new client.
+     *
+     * @param client the client
+     *
+     * @return the client response
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public ClientResponse createClient(final Client client) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, ClientResponse.class, "POST", "clients", null, client.toJson());
+    }
+
+    /**
+     * Update the client.
+     *
+     * @param client the client
+     * @param id the id of the client
+     *
+     * @return the client response
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public ClientResponse updateClient(final Client client, final Long id) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, ClientResponse.class, "PUT", "clients", null, client.toJson(), id);
+    }
+
+    /**
+     * Delete the client.
+     *
+     * @param id the id of the client
+     *
+     * @return the client response
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public ClientResponse deleteClient(final Long id) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, ClientResponse.class, "DELETE", "clients", null, null, id);
     }
 
     /**

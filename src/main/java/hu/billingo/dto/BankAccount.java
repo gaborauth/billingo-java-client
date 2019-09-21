@@ -3,15 +3,15 @@
  */
 package hu.billingo.dto;
 
-import hu.billingo.dto.base.ResponseData;
 import com.google.gson.annotations.SerializedName;
+import hu.billingo.utils.JsonUtils;
 
 /**
  * DTO class of a bank account.
  *
  * @author <a href="mailto:gabor.auth@iotguru.cloud">Gábor AUTH</a>
  */
-public class BankAccount extends ResponseData {
+public class BankAccount {
 
     @SerializedName("bank_name")
     private String bankName;
@@ -72,5 +72,14 @@ public class BankAccount extends ResponseData {
 
     public void setUid(Long uid) {
         this.uid = uid;
+    }
+
+    /**
+     * Creates a JSON string.
+     *
+     * @return the JSON string
+     */
+    public final String toJson() {
+        return JsonUtils.toJson(this);
     }
 }
