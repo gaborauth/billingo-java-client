@@ -39,15 +39,19 @@ public class MainClass {
 
         System.out.println("====");
 
+        client.getCurrency("EUR", "HUF", 1.0);
+
+        System.out.println("====");
+
+        client.getPaymentMethod("hu");
+
+        System.out.println("====");
+
         client.getVats();
 
         System.out.println("====");
 
         client.getVatEu("DE", "104.20.46.161", "DE", null);
-
-        System.out.println("====");
-
-        client.getPaymentMethod("hu");
 
         System.out.println("====");
     }
