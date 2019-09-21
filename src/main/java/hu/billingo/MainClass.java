@@ -112,6 +112,10 @@ public class MainClass {
 
         System.out.println("====");
 
+        client.getExpenseCategories("hu");
+
+        System.out.println("====");
+        
         client.getPaymentMethod("hu");
 
         System.out.println("====");

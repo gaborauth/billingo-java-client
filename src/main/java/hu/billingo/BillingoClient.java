@@ -11,6 +11,7 @@ import hu.billingo.dto.Client;
 import hu.billingo.dto.ClientListResponse;
 import hu.billingo.dto.ClientResponse;
 import hu.billingo.dto.CurrencyResponse;
+import hu.billingo.dto.ExpenseCategoryListResponse;
 import hu.billingo.dto.PaymentMethodListResponse;
 import hu.billingo.dto.VatEuResponse;
 import hu.billingo.dto.VatListResponse;
@@ -211,6 +212,20 @@ public final class BillingoClient {
         queryParams.put("value", "" + value);
 
         return restHelper(publicKey, privateKey, CurrencyResponse.class, "GET", "currency", queryParams, null);
+    }
+
+    /**
+     * List of expense categories.
+     *
+     * @param langCode the language code
+     *
+     * @return the expense categories response
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public ExpenseCategoryListResponse getExpenseCategories(final String langCode) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, ExpenseCategoryListResponse.class, "GET", "expenses/categories", null, null, langCode);
     }
 
     /**
