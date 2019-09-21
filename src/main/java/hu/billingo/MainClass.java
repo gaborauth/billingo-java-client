@@ -9,6 +9,8 @@ import hu.billingo.dto.Client;
 import hu.billingo.dto.ClientDefaults;
 import hu.billingo.dto.ClientListResponse;
 import hu.billingo.dto.ClientResponse;
+import hu.billingo.dto.Expense;
+import hu.billingo.dto.ExpenseListResponse;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
@@ -36,30 +38,30 @@ public class MainClass {
         final String publicKey = args[0];
         final String privateKey = args[1];
 
-        final BillingoClient client = BillingoClient.builder()
+        final BillingoClient billingoClient = BillingoClient.builder()
                 .publicKey(publicKey)
                 .privateKey(privateKey)
                 .build();
 
-        client.getBankAccounts();
+        billingoClient.getBankAccounts();
 
         System.out.println("====");
 
-        final ClientListResponse clientList = client.getClients(null, null);
+        final ClientListResponse clientList = billingoClient.getClients(null, null);
 
         System.out.println("====");
 
         if (clientList.getData() != null && clientList.getData().size() > 0) {
-            client.getClient(clientList.getData().get(0).getId());
+            billingoClient.getClient(clientList.getData().get(0).getId());
         }
 
         System.out.println("====");
 
-        final Client c = new Client();
-        c.setName("Gigazoom LLC.");
-        c.setEmail("rbrooks5@amazon.com");
-        c.setTaxcode("123456");
-        c.setForce(Boolean.FALSE);
+        final Client client = new Client();
+        client.setName("Gigazoom LLC.");
+        client.setEmail("rbrooks5@amazon.com");
+        client.setTaxcode("123456");
+        client.setForce(Boolean.FALSE);
 
         final BillingAddress ba = new BillingAddress();
         ba.setStreetName("Moulton");
@@ -73,18 +75,18 @@ public class MainClass {
         ba.setPostcode("PR1");
         ba.setDistrict("XII");
         ba.setCountry("United Kingdom");
-        c.setBillingAddress(ba);
+        client.setBillingAddress(ba);
 
-        c.setPhone("");
+        client.setPhone("");
 
         final Bank bank = new Bank();
         bank.setAccountNumber("12345678-12345678-12345678");
         bank.setAccountIban("");
         bank.setAccountSwift("");
-        c.setBank(bank);
+        client.setBank(bank);
 
-        c.setLedgerAccountNumber("");
-        c.setType("2");
+        client.setLedgerAccountNumber("");
+        client.setType("2");
 
         final ClientDefaults defaults = new ClientDefaults();
 
@@ -93,38 +95,64 @@ public class MainClass {
         defaults.setInvoiceDueDays("3");
         defaults.setInvoiceCurrency("HUF");
         defaults.setInvoiceTemplateLangCode("hu");
-        c.setDefaults(defaults);
+        client.setDefaults(defaults);
 
-        final ClientResponse cr = client.createClient(c);
-
-        System.out.println("====");
-
-        c.setName("Gigazoom Ltd");
-        client.updateClient(c, cr.getData().getId());
+        final ClientResponse cr = billingoClient.createClient(client);
 
         System.out.println("====");
 
-        client.deleteClient(cr.getData().getId());
+        client.setName("Gigazoom Ltd");
+        billingoClient.updateClient(client, cr.getData().getId());
 
         System.out.println("====");
 
-        client.getCurrency("EUR", "HUF", 1.0);
+        billingoClient.deleteClient(cr.getData().getId());
 
         System.out.println("====");
 
-        client.getExpenseCategories("hu");
-
-        System.out.println("====");
-        
-        client.getPaymentMethod("hu");
+        billingoClient.getCurrency("EUR", "HUF", 1.0);
 
         System.out.println("====");
 
-        client.getVats();
+        billingoClient.getExpenseCategories("hu");
 
         System.out.println("====");
 
-        client.getVatEu("DE", "104.20.46.161", "DE", null);
+        final ExpenseListResponse er = billingoClient.getExpenses(null, null);
+
+        System.out.println("====");
+
+        if (er.getData() == null || er.getData().isEmpty()) {
+            final Expense expense = new Expense();
+            expense.setCategoriesId(2L);
+            expense.setName("Office Supplies");
+            expense.setInvoiceNo("2019-000002");
+            expense.setClientUid(cr.getData().getId());
+            expense.setGrossPrice(1000.0);
+            expense.setVat(1L);
+            expense.setCurrency("HUF");
+            expense.setDueDate("2017-01-15");
+
+            billingoClient.createExpense(expense);
+        } else {
+            final Long expenseId = er.getData().get(0).getId();
+            final Expense expense = er.getData().get(0).getAttributes();
+            
+            expense.setName("Office Supplies Updated");
+            billingoClient.updateExpense(expense, expenseId);
+        }
+
+        System.out.println("====");
+
+        billingoClient.getPaymentMethod("hu");
+
+        System.out.println("====");
+
+        billingoClient.getVats();
+
+        System.out.println("====");
+
+        billingoClient.getVatEu("DE", "104.20.46.161", "DE", null);
 
         System.out.println("====");
     }

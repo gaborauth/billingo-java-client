@@ -11,7 +11,10 @@ import hu.billingo.dto.Client;
 import hu.billingo.dto.ClientListResponse;
 import hu.billingo.dto.ClientResponse;
 import hu.billingo.dto.CurrencyResponse;
+import hu.billingo.dto.Expense;
 import hu.billingo.dto.ExpenseCategoryListResponse;
+import hu.billingo.dto.ExpenseListResponse;
+import hu.billingo.dto.ExpenseResponse;
 import hu.billingo.dto.PaymentMethodListResponse;
 import hu.billingo.dto.VatEuResponse;
 import hu.billingo.dto.VatListResponse;
@@ -23,7 +26,7 @@ import java.util.Map;
 /**
  * Billingo client.
  *
- * @TODO: Missing: Invoices, Recurring, Invoice query, Expenses, Products
+ * @TODO: Missing: Invoices, Recurring, Invoice query, Products
  *
  * @author <a href="mailto:gabor.auth@iotguru.cloud">Gábor AUTH</a>
  */
@@ -226,6 +229,58 @@ public final class BillingoClient {
      */
     public ExpenseCategoryListResponse getExpenseCategories(final String langCode) throws IOException, NoSuchAlgorithmException {
         return restHelper(publicKey, privateKey, ExpenseCategoryListResponse.class, "GET", "expenses/categories", null, null, langCode);
+    }
+
+    /**
+     * Return the list of expenses.
+     *
+     * @param page the page
+     * @param maxPerPage maximum number of results
+     *
+     * @return the list of expenses
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public ExpenseListResponse getExpenses(final Integer page, final Integer maxPerPage) throws IOException, NoSuchAlgorithmException {
+        final Map<String, String> queryParams = new HashMap<>();
+        if (page != null) {
+            queryParams.put("page", "" + page);
+        }
+        if (maxPerPage != null) {
+            queryParams.put("max_per_page", "" + maxPerPage);
+        }
+
+        return restHelper(publicKey, privateKey, ExpenseListResponse.class, "GET", "expenses", queryParams, null);
+    }
+
+    /**
+     * Create a new expense.
+     *
+     * @param expense the expense
+     *
+     * @return the expense response
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public ExpenseResponse createExpense(final Expense expense) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, ExpenseResponse.class, "POST", "expenses", null, expense.toJson());
+    }
+
+    /**
+     * Update the expense.
+     *
+     * @param expense the expense
+     * @param id the id of the expense
+     *
+     * @return the expense response
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public ExpenseResponse updateExpense(final Expense expense, final Long id) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, ExpenseResponse.class, "PUT", "expenses", null, expense.toJson(), id);
     }
 
     /**
