@@ -46,5 +46,9 @@ public class MainClass {
         client.getVatEu("DE", "104.20.46.161", "DE", null);
 
         System.out.println("====");
+
+        client.getPaymentMethod("hu");
+
+        System.out.println("====");
     }
 }

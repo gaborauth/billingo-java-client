@@ -7,6 +7,7 @@ import static hu.billingo.BillingoClientHelper.restHelper;
 import hu.billingo.dto.BankAccount;
 import hu.billingo.dto.BankAccountListResponse;
 import hu.billingo.dto.BankAccountResponse;
+import hu.billingo.dto.PaymentMethodListResponse;
 import hu.billingo.dto.VatEuResponse;
 import hu.billingo.dto.VatListResponse;
 import java.io.IOException;
@@ -103,6 +104,20 @@ public final class BillingoClient {
      */
     public BankAccountResponse updateBankAccount(final BankAccount account, final Long id) throws IOException, NoSuchAlgorithmException {
         return restHelper(publicKey, privateKey, BankAccountResponse.class, "PUT", "bank_accounts", null, account.toJson(), id);
+    }
+
+    /**
+     * Return the list of payment methods.
+     *
+     * @param langCode language code of the payment methods
+     *
+     * @return the list of payment methods
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public PaymentMethodListResponse getPaymentMethod(final String langCode) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, PaymentMethodListResponse.class, "GET", "payment_methods", null, null, langCode);
     }
 
     /**
