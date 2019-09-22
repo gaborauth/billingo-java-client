@@ -4,6 +4,7 @@
 package hu.billingo;
 
 import hu.billingo.dto.Bank;
+import hu.billingo.dto.BankAccountListResponse;
 import hu.billingo.dto.BillingAddress;
 import hu.billingo.dto.Client;
 import hu.billingo.dto.ClientDefaults;
@@ -11,8 +12,14 @@ import hu.billingo.dto.ClientListResponse;
 import hu.billingo.dto.ClientResponse;
 import hu.billingo.dto.Expense;
 import hu.billingo.dto.ExpenseListResponse;
+import hu.billingo.dto.InvoiceItem;
+import hu.billingo.dto.InvoiceListResponse;
+import hu.billingo.dto.InvoiceNew;
+import hu.billingo.dto.InvoicePayment;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Speedy test of the client library.
@@ -43,7 +50,7 @@ public class MainClass {
                 .privateKey(privateKey)
                 .build();
 
-        billingoClient.getBankAccounts();
+        final BankAccountListResponse br = billingoClient.getBankAccounts();
 
         System.out.println("====");
 
@@ -53,9 +60,9 @@ public class MainClass {
 
         if (clientList.getData() != null && clientList.getData().size() > 0) {
             billingoClient.getClient(clientList.getData().get(0).getId());
-        }
 
-        System.out.println("====");
+            System.out.println("====");
+        }
 
         final Client client = new Client();
         client.setName("Gigazoom LLC.");
@@ -137,10 +144,89 @@ public class MainClass {
         } else {
             final Long expenseId = er.getData().get(0).getId();
             final Expense expense = er.getData().get(0).getAttributes();
-            
+
             expense.setName("Office Supplies Updated");
             billingoClient.updateExpense(expense, expenseId);
         }
+
+        System.out.println("====");
+
+        final InvoiceListResponse ir = billingoClient.getInvoices(null, null);
+
+        System.out.println("====");
+
+        if (ir.getData() != null && ir.getData().size() > 0) {
+            billingoClient.getInvoice(ir.getData().get(0).getId());
+
+            System.out.println("====");
+
+            billingoClient.getInvoiceDownloadCode(ir.getData().get(0).getId());
+
+            System.out.println("====");
+
+            billingoClient.getInvoiceFromProforma(ir.getData().get(0).getId());
+
+            System.out.println("====");
+
+            billingoClient.getInvoicePdf(ir.getData().get(0).getId());
+
+            System.out.println("====");
+
+            billingoClient.sendInvoice(ir.getData().get(0).getId());
+
+            System.out.println("====");
+
+            final InvoicePayment payment = new InvoicePayment();
+            payment.setDate("2019-09-21");
+            payment.setAmount(2000.0);
+            payment.setPaymentMethod(2L);
+
+            billingoClient.updateInvoicePayment(ir.getData().get(0).getId(), payment);
+
+            System.out.println("====");
+
+            billingoClient.undoInvoicePayment(ir.getData().get(0).getId());
+
+            System.out.println("====");
+
+            billingoClient.cancelInvoice(ir.getData().get(0).getId());
+
+            System.out.println("====");
+        }
+
+        billingoClient.getInvoiceBlocks();
+
+        System.out.println("====");
+
+        final InvoiceNew newInvoice = new InvoiceNew();
+        newInvoice.setFulfillmentDate("2015-12-12");
+        newInvoice.setDueDate("2015-12-20");
+        newInvoice.setPaymentMethod(1L);
+        newInvoice.setComment("");
+        newInvoice.setTemplateLangCode("hu");
+        newInvoice.setElectronic_invoice(0L);
+        newInvoice.setCurrency("HUF");
+        newInvoice.setExchange_rate(null);
+        newInvoice.setClientUid(cr.getData().getId());
+        newInvoice.setBlockUid(0L);
+        newInvoice.setType(3L);
+        newInvoice.setRoundTo(0L);
+        newInvoice.setBankAccountUid(br.getData().get(0).getId());
+
+        final InvoiceItem invoiceItem = new InvoiceItem();
+        invoiceItem.setDescription("Test Item");
+        invoiceItem.setVatId(1L);
+        invoiceItem.setQty(1.0);
+        invoiceItem.setNetUnitPrice(3500.0);
+        invoiceItem.setUnit("pc");
+        invoiceItem.setItemComment("Item comment");
+
+        final List<InvoiceItem> items = new ArrayList<>();
+        items.add(invoiceItem);
+
+        newInvoice.setItems(items);
+
+        billingoClient.createInvoice(newInvoice);
 
         System.out.println("====");
 

@@ -15,6 +15,16 @@ import hu.billingo.dto.Expense;
 import hu.billingo.dto.ExpenseCategoryListResponse;
 import hu.billingo.dto.ExpenseListResponse;
 import hu.billingo.dto.ExpenseResponse;
+import hu.billingo.dto.InvoiceBlockListResponse;
+import hu.billingo.dto.InvoiceCodeResponse;
+import hu.billingo.dto.InvoiceFromProformaResponse;
+import hu.billingo.dto.InvoiceListResponse;
+import hu.billingo.dto.InvoiceNew;
+import hu.billingo.dto.InvoicePayment;
+import hu.billingo.dto.InvoicePaymentResponse;
+import hu.billingo.dto.InvoicePdfResponse;
+import hu.billingo.dto.InvoiceResponse;
+import hu.billingo.dto.InvoiceSendResponse;
 import hu.billingo.dto.PaymentMethodListResponse;
 import hu.billingo.dto.VatEuResponse;
 import hu.billingo.dto.VatListResponse;
@@ -26,7 +36,7 @@ import java.util.Map;
 /**
  * Billingo client.
  *
- * @TODO: Missing: Invoices, Recurring, Invoice query, Products
+ * @TODO: Missing: Recurring, Invoice query, Products
  *
  * @author <a href="mailto:gabor.auth@iotguru.cloud">Gábor AUTH</a>
  */
@@ -281,6 +291,168 @@ public final class BillingoClient {
      */
     public ExpenseResponse updateExpense(final Expense expense, final Long id) throws IOException, NoSuchAlgorithmException {
         return restHelper(publicKey, privateKey, ExpenseResponse.class, "PUT", "expenses", null, expense.toJson(), id);
+    }
+
+    /**
+     * Return the list of invoices.
+     *
+     * @param page the page
+     * @param maxPerPage maximum number of results
+     *
+     * @return the list of invoices
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public InvoiceListResponse getInvoices(final Integer page, final Integer maxPerPage) throws IOException, NoSuchAlgorithmException {
+        final Map<String, String> queryParams = new HashMap<>();
+        if (page != null) {
+            queryParams.put("page", "" + page);
+        }
+        if (maxPerPage != null) {
+            queryParams.put("max_per_page", "" + maxPerPage);
+        }
+
+        return restHelper(publicKey, privateKey, InvoiceListResponse.class, "GET", "invoices", queryParams, null);
+    }
+
+    /**
+     * Return the invoice.
+     *
+     * @param id the id of the invoice
+     *
+     * @return the list of invoice
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public InvoiceListResponse getInvoice(final Long id) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, InvoiceListResponse.class, "GET", "invoices", null, null, id);
+    }
+
+    /**
+     * Create a new invoice.
+     *
+     * @param invoice the invoice
+     *
+     * @return the invoice response
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public InvoiceResponse createInvoice(final InvoiceNew invoice) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, InvoiceResponse.class, "POST", "invoices", null, invoice.toJson());
+    }
+
+    /**
+     * Return the download code of an invoice.
+     *
+     * @param id the id of the invoice
+     *
+     * @return the download code of invoice
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public InvoiceCodeResponse getInvoiceDownloadCode(final Long id) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, InvoiceCodeResponse.class, "GET", "invoices", null, null, id, "code");
+    }
+
+    /**
+     * Generate normal invoice from proforma invoice.
+     *
+     * @param id the id of the proforma invoice
+     *
+     * @return the invoice id response
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public InvoiceFromProformaResponse getInvoiceFromProforma(final Long id) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, InvoiceFromProformaResponse.class, "GET", "invoices", null, null, id, "generate");
+    }
+
+    /**
+     * Return the PDF content of an invoice.
+     *
+     * @param id the id of the invoice
+     *
+     * @return the download code of invoice
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public InvoicePdfResponse getInvoicePdf(final Long id) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, InvoicePdfResponse.class, "GET", "invoices", null, null, id, "download");
+    }
+
+    /**
+     * Cancel the invoice.
+     *
+     * @param id the id of the invoice
+     *
+     * @return the invoice response
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public InvoiceResponse cancelInvoice(final Long id) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, InvoiceResponse.class, "GET", "invoices", null, null, id, "cancel");
+    }
+
+    /**
+     * Send the invoice.
+     *
+     * @param id the id of the invoice
+     *
+     * @return the invoice send response
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public InvoiceSendResponse sendInvoice(final Long id) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, InvoiceSendResponse.class, "GET", "invoices", null, null, id, "send");
+    }
+
+    /**
+     * Update payment of an invoice.
+     *
+     * @param id the id of the invoice
+     * @param payment the payment details
+     *
+     * @return the payment response
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public InvoicePaymentResponse updateInvoicePayment(final Long id, final InvoicePayment payment) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, InvoicePaymentResponse.class, "POST", "invoices", null, payment.toJson(), id, "pay");
+    }
+
+    /**
+     * Undo payment of an invoice.
+     *
+     * @param id the id of the invoice
+     *
+     * @return the payment response
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public InvoicePaymentResponse undoInvoicePayment(final Long id) throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, InvoicePaymentResponse.class, "DELETE", "invoices", null, null, id, "pay");
+    }
+
+    /**
+     * Return the list of invoice blocks.
+     *
+     * @return the list of invoice blocks
+     *
+     * @throws IOException
+     * @throws NoSuchAlgorithmException
+     */
+    public InvoiceBlockListResponse getInvoiceBlocks() throws IOException, NoSuchAlgorithmException {
+        return restHelper(publicKey, privateKey, InvoiceBlockListResponse.class, "GET", "invoices/blocks", null, null);
     }
 
     /**

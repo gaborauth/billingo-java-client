@@ -16,6 +16,8 @@ public abstract class Response {
 
     @SerializedName("success")
     private Boolean success;
+    @SerializedName("id")
+    private Long id;
     @SerializedName("error")
     private String error;
     @SerializedName("errors")
@@ -27,6 +29,14 @@ public abstract class Response {
 
     public void setSuccess(Boolean success) {
         this.success = success;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getError() {

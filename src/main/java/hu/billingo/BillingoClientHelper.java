@@ -3,12 +3,15 @@
  */
 package hu.billingo;
 
+import hu.billingo.dto.InvoicePdfResponse;
 import hu.billingo.dto.base.Response;
 import hu.billingo.utils.JsonUtils;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -128,10 +131,36 @@ final class BillingoClientHelper {
         LOGGER.info("{} -  Response status: {}", method, status);
         final StringBuilder content = new StringBuilder();
         if (status == 200) {
-            try (final BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
-                String inputLine;
-                while ((inputLine = in.readLine()) != null) {
-                    content.append(inputLine);
+            if (type.equals(InvoicePdfResponse.class)) {
+                int n;
+                final byte[] buffer = new byte[4096];
+
+                final InvoicePdfResponse pdfResponse = new InvoicePdfResponse();
+                try (final InputStream is = con.getInputStream()) {
+                    try (final ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+                        while ((n = is.read(buffer)) != -1) {
+                            baos.write(buffer, 0, n);
+                        }
+
+                        pdfResponse.setSuccess(Boolean.TRUE);
+                        pdfResponse.setContent(baos.toByteArray());
+                    }
+                }
+
+                if (pdfResponse.getContent() == null) {
+                    LOGGER.info("{} - Original content: (no content)", method);
+                } else {
+                    LOGGER.info("{} - Original content: {} bytes of binary data", method, pdfResponse.getContent().length);
+                }
+
+                con.disconnect();
+                return (T) pdfResponse;
+            } else {
+                try (final BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        content.append(inputLine);
+                    }
                 }
             }
         } else {
