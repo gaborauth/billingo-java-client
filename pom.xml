@@ -74,7 +74,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <scope>runtime</scope>
+            <scope>provided</scope>
         </dependency>
 
         <!-- The container provided dependencies -->
@@ -138,21 +138,14 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <descriptors>
+                        <descriptor>src/main/assembly/assembly.xml</descriptor>
+                    </descriptors>
                     <archive>
                         <manifest>
                             <mainClass>hu.billingo.MainClass</mainClass>
                         </manifest>
                     </archive>
-                    <dependencySets>
-                        <dependencySet>
-                            <includes>
-                                <include>org.slf4j:org.slf4j-simple</include>
-                            </includes>
-                        </dependencySet>
-                    </dependencySets>                    
                 </configuration>
                 <executions>
                     <execution>
